@@ -8,6 +8,9 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const morgan = require('morgan');
 require('dotenv').config();
 
 const app = express();
@@ -32,6 +35,24 @@ const upload = multer({ storage: storage });
 
 // Middleware
 app.use(cors());
+
+// Security Headers
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Rate Limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 300, // limit each IP to 300 requests per windowMs (relaxed for demo/testing)
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use(limiter);
+
+// Logging
+app.use(morgan('combined'));
+
 app.use(express.json());
 // Serve uploads statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -1042,4 +1063,8 @@ sequelize.sync({ alter: true }).then(() => {
 // NOTE: Use app.listen now
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
+
+    if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'fallback_secret_not_for_prod') {
+        console.warn('WARNING: You are using the default JWT_SECRET. Please set a secure JWT_SECRET in your .env file for production!');
+    }
 });
