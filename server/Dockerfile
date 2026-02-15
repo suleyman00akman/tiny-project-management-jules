@@ -1,5 +1,5 @@
 # Node.js resmi imajını kullan (Versiyon 24)
-FROM node:24-alpine
+FROM public.ecr.aws/docker/library/node:18
 
 WORKDIR /app
 

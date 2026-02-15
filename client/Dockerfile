@@ -1,5 +1,5 @@
 # --- Aşama 1: Build (Derleme) ---
-FROM node:22-alpine AS build-stage
+FROM public.ecr.aws/docker/library/node:18 AS build-stage
 WORKDIR /app
 
 # Paketleri yükle
@@ -12,7 +12,7 @@ RUN npm run build
 # (Not: Build sonucu Vite için 'dist' klasörüne çıkar.)
 
 # --- Aşama 2: Production (Sunum) ---
-FROM nginx:alpine AS production-stage
+FROM public.ecr.aws/docker/library/nginx:alpine AS production-stage
 
 # Nginx'in varsayılan html klasörüne build dosyalarını kopyala
 # Vite defaults to 'dist'

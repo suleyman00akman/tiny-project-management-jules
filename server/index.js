@@ -8,11 +8,34 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+const morgan = require('morgan');
 require('dotenv').config();
 
 const app = express();
 
-const PORT = process.env.PORT || 3000;
+// Security & Performance Middleware
+app.use(helmet());
+app.use(compression());
+app.use(morgan('combined'));
+
+// Rate Limiter for API
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 200, // limit each IP to 200 requests per windowMs
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+app.use('/api', limiter);
+
+// Health Check Endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'OK', timestamp: new Date() });
+});
+
+const PORT = process.env.SERVER_PORT || process.env.PORT || 3000;
 
 // Ensure uploads directory exists
 if (!fs.existsSync('uploads')) {
@@ -102,10 +125,6 @@ const requireAuth = async (req, res, next) => {
         res.status(403).json({ message: "Invalid or expired token" });
     }
 };
-
-// --- ROUTES ---
-
-// 1. AUTH & REGISTRATION FLOW
 
 // --- ROUTES ---
 

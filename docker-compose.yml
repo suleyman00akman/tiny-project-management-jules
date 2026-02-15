@@ -33,14 +33,14 @@ services:
 
   # Redis Cache Service
   redis:
-    image: redis:7-alpine
+    image: public.ecr.aws/docker/library/redis:7-alpine
     restart: always
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
 
   # Database Service
   db:
-    image: postgres:15-alpine
+    image: public.ecr.aws/docker/library/postgres:15-alpine
     restart: always
     environment:
       - POSTGRES_DB=${DB_NAME}
